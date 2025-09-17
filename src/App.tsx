@@ -10,8 +10,7 @@ const App: React.FC = () => {
     <StockProvider>
       <div className="App">
         <header className="app-header">
-          <h1>AniStock</h1>
-          <p>Watch your stock climb or fall in real-time!</p>
+          <h1>All-In-Dex</h1>
         </header>
         
         <main className="app-main">

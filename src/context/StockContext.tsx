@@ -11,7 +11,7 @@ export const StockProvider: React.FC<StockProviderProps> = ({ children }) => {
   const [stockData, setStockData] = useState<StockPrice | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState<boolean>(true); // Default to mock for demo
+  const [useMockData, setUseMockData] = useState<boolean>(process.env.REACT_APP_USE_MOCK_DATA === 'true');
 
   const value: StockContextType = {
     stockData,

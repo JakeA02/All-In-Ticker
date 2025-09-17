@@ -127,7 +127,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
         </Group>
 
         {/* Main chart group */}
-        <Group left={MARGIN} top={MARGIN}>
+        <Group left={MARGIN + 10} top={MARGIN}>
           {/* Draw the curve line */}
           {visibleData.length > 1 && (
             <LinePath<StockDataPoint>

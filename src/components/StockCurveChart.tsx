@@ -15,6 +15,7 @@ export interface StockCurveChartProps {
   showControls?: boolean;
 }
 
+
 // Data accessors for stock data points
 const getX = (d: StockDataPoint) => new Date(d.timestamp);
 const getY = (d: StockDataPoint) => d.price;
@@ -28,6 +29,19 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [showPoints, setShowPoints] = useState<boolean>(true);
 
   const { stockData, isLoading, error } = useFinnhubStock();
+
+
+  const stockIsUp = () => {
+    return stockData?.previousClose &&
+      stockData?.current &&
+      stockData?.previousClose < stockData?.current
+  }
+
+  const stockColor = () => {
+    return stockIsUp() ? "#00E676" : "#FF5252";
+  }
+
+  
 
   const svgHeight = showControls ? height - 40 : height;
   const MARGIN = 40;
@@ -142,6 +156,19 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           </text>
         </Group> */}
 
+        <Group>
+          <text
+            x={MARGIN + 50}
+            y={MARGIN - 10}
+            textAnchor="middle"
+            fontSize={20}
+            fill={stockColor()}
+          >
+            {stockData?.symbol} ({stockIsUp() ? "+" : "-"}{stockData?.changeOverDayPercent.toFixed(2)}%)
+          </text>
+
+        </Group>
+
         {/* Grid lines */}
         <Group left={MARGIN} top={MARGIN}>
           {/* Horizontal grid lines */}
@@ -180,13 +207,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               data={visibleData}
               x={(d) => xScale(getX(d)) ?? 0}
               y={(d) => yScale(getY(d)) ?? 0}
-              stroke={
-                stockData?.previousClose &&
-                stockData?.current &&
-                stockData?.previousClose > stockData?.current
-                  ? "#FF5252"
-                  : "#00E676"
-              }
+              stroke={stockColor()}
               strokeWidth={2}
               fill="none"
               shapeRendering="geometricPrecision"
@@ -201,7 +222,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
                 cx={xScale(getX(d))}
                 cy={yScale(getY(d))}
                 r={2}
-                fill="#3C3F51"
+                fill={stockColor()}
                 stroke="white"
                 strokeWidth={1}
               />

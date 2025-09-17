@@ -4,7 +4,7 @@ import { StockPrice, FinnhubQuote } from '../types/stock';
 import { generateMockStockData } from '../utils/mockData';
 
 const FINNHUB_API_KEY = 'your_finnhub_api_key_here'; // Replace with actual API key
-const POLLING_INTERVAL = 5000; // 1 minute (60 seconds)
+const POLLING_INTERVAL = 30000; // 1 minute (60 seconds)
 
 export const useFinnhubStock = (symbol: string = 'AAPL') => {
   const { useMockData } = useStock();

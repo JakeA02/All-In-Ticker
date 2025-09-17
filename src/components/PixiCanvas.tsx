@@ -20,7 +20,7 @@ export const PixiCanvas: React.FC<PixiCanvasProps> = ({
     const app = new PIXI.Application({
       width,
       height,
-      backgroundColor: 0x000000,
+      backgroundColor: 0xFFFFFF,
       backgroundAlpha: 0, // Transparent background
       antialias: true,
     });

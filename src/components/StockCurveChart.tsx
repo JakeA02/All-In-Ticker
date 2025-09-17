@@ -83,9 +83,9 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 
   return (
     <div className="stock-curve-chart">
-      <svg width={width} height={svgHeight} style={{ border: '1px solid #ccc' }}>
+      <svg width={width} height={svgHeight} style={{ border: '5px solid #ccc' }}>
         {/* Background */}
-        <rect width={width} height={svgHeight} fill="#f8f9fa" />
+        <rect width={width} height={svgHeight} fill="#1B1F3B" />
         
         {/* Chart area background */}
         <rect 
@@ -93,8 +93,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           y={MARGIN} 
           width={graphWidth} 
           height={graphHeight} 
-          fill="white" 
-          stroke="#e0e0e0"
+          fill="#1B1F3B" 
+          stroke="none"
         />
         
         {/* Grid lines */}
@@ -107,7 +107,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               x2={graphWidth}
               y1={yScale(tick)}
               y2={yScale(tick)}
-              stroke="#f0f0f0"
+              stroke="#3C3F51"
               strokeWidth={1}
             />
           ))}
@@ -120,7 +120,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               x2={xScale(tick)}
               y1={0}
               y2={graphHeight}
-              stroke="#f0f0f0"
+              stroke="#3C3F51"
               strokeWidth={1}
             />
           ))}
@@ -135,7 +135,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               data={visibleData}
               x={(d) => xScale(getX(d)) ?? 0}
               y={(d) => yScale(getY(d)) ?? 0}
-              stroke="#2563eb"
+              stroke={stockData?.previousClose && stockData?.current && stockData?.previousClose > stockData?.current ? "#FF5252" : "#00E676"}
               strokeWidth={2}
               fill="none"
               shapeRendering="geometricPrecision"
@@ -149,7 +149,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               cx={xScale(getX(d))}
               cy={yScale(getY(d))}
               r={2}
-              fill="#2563eb"
+              fill="#3C3F51"
               stroke="white"
               strokeWidth={1}
             />
@@ -161,7 +161,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               cx={xScale(getX(visibleData[visibleData.length - 1]))}
               cy={yScale(getY(visibleData[visibleData.length - 1]))}
               r={4}
-              fill="#dc2626"
+              fill="#6e1bf2"
               stroke="white"
               strokeWidth={2}
             />
@@ -169,7 +169,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
         </Group>
 
         {/* Y-axis labels */}
-        <Group left={MARGIN - 10} top={MARGIN}>
+        <Group left={MARGIN} top={MARGIN}>
           {yScale.ticks(5).map((tick, i) => (
             <text
               key={`y-label-${i}`}
@@ -177,7 +177,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               y={yScale(tick)}
               textAnchor="end"
               fontSize={10}
-              fill="#666"
+              fill="#EDEDED"
             >
               ${tick.toFixed(2)}
             </text>
@@ -193,7 +193,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               y={0}
               textAnchor="middle"
               fontSize={10}
-              fill="#666"
+              fill="#EDEDED"
             >
               {tick.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 

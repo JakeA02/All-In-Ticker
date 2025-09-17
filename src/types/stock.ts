@@ -11,6 +11,8 @@ export interface StockPrice {
   changePercent: number;
   timestamp: number;
   minuteData?: StockDataPoint[]; // 390 points for full trading day (9:30 AM - 4:00 PM)
+  changeOverDay: number;
+  changeOverDayPercent: number;
 }
 
 export interface StockContextType {

@@ -78,7 +78,8 @@ export const generateMockStockData = (): StockPrice => {
   
   const change = current - previousClose;
   const changePercent = (change / previousClose) * 100;
-
+  const changeOverDay = current - previousClose;
+  const changeOverDayPercent = (changeOverDay / previousClose) * 100;
   return {
     symbol: 'MOCK',
     current: Math.round(current * 100) / 100,
@@ -86,7 +87,9 @@ export const generateMockStockData = (): StockPrice => {
     change: Math.round(change * 100) / 100,
     changePercent: Math.round(changePercent * 100) / 100,
     timestamp: newPoint.timestamp,
-    minuteData: allPoints
+    minuteData: allPoints,
+    changeOverDay,
+    changeOverDayPercent,
   };
 };
 

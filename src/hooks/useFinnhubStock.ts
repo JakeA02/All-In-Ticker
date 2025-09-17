@@ -4,7 +4,7 @@ import { StockPrice, FinnhubQuote } from '../types/stock';
 import { generateMockStockData } from '../utils/mockData';
 
 const FINNHUB_API_KEY = 'your_finnhub_api_key_here'; // Replace with actual API key
-const POLLING_INTERVAL = 30000; // 1 minute (60 seconds)
+const POLLING_INTERVAL = 5000; // 1 minute (60 seconds)
 
 export const useFinnhubStock = (symbol: string = 'AAPL') => {
   const { useMockData } = useStock();
@@ -25,6 +25,9 @@ export const useFinnhubStock = (symbol: string = 'AAPL') => {
       }
       
       const data: FinnhubQuote = await response.json();
+
+      const changeOverDay = data.c - data.pc;
+      const changeOverDayPercent = (changeOverDay / data.pc) * 100;
       
       return {
         symbol,
@@ -33,6 +36,8 @@ export const useFinnhubStock = (symbol: string = 'AAPL') => {
         change: data.c - data.pc,
         changePercent: ((data.c - data.pc) / data.pc) * 100,
         timestamp: data.t * 1000, // Convert to milliseconds
+        changeOverDay,
+        changeOverDayPercent,
       };
     } catch (error) {
       console.error('Error fetching stock data:', error);

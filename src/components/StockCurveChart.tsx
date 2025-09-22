@@ -6,6 +6,7 @@ import { LinePath } from "@visx/shape";
 import { scaleTime, scaleLinear } from "@visx/scale";
 import { StockDataPoint } from "../types/stock";
 import { useFinnhubStock } from "../hooks/useFinnhubStock";
+import { Workman } from "./Workman";
 
 type CurveType = keyof typeof allCurves;
 
@@ -28,6 +29,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [curveType, setCurveType] = useState<CurveType>("curveLinear");
   const [showPoints, setShowPoints] = useState<boolean>(true);
   const [lastSegmentTime, setLastSegmentTime] = useState<number | null>(null);
+  const [newDataPoint, setNewDataPoint] = useState<StockDataPoint | null>(null);
 
   const { stockData, isLoading, error } = useFinnhubStock();
 
@@ -58,6 +60,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 
       if (lastTimestamp && lastTimestamp !== lastSegmentTime) {
         setLastSegmentTime(lastTimestamp);
+        setNewDataPoint(lastDataPoint); // Trigger Workman animation
       }
     }
   }, [minuteData, lastSegmentTime]);
@@ -332,8 +335,21 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
                 hour12: true,
               })}
             </text>
-          ))}
+          )          )}
         </Group>
+
+        {/* Workman overlay */}
+        <Workman
+          width={width}
+          height={svgHeight}
+          margin={MARGIN}
+          graphWidth={graphWidth}
+          graphHeight={graphHeight}
+          xScale={xScale}
+          yScale={yScale}
+          newDataPoint={newDataPoint}
+          onAnimationComplete={() => setNewDataPoint(null)}
+        />
       </svg>
     </div>
   );

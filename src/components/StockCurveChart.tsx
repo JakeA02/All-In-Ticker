@@ -30,6 +30,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [showPoints, setShowPoints] = useState<boolean>(true);
   const [lastSegmentTime, setLastSegmentTime] = useState<number | null>(null);
   const [newDataPoint, setNewDataPoint] = useState<StockDataPoint | null>(null);
+  const [isBuilding, setIsBuilding] = useState<boolean>(false);
 
   const { stockData, isLoading, error } = useFinnhubStock();
 
@@ -38,6 +39,11 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     return stockData?.previousClose &&
       stockData?.current &&
       stockData?.previousClose < stockData?.current
+  }
+
+  const handleBuildingComplete = () => {
+    setNewDataPoint(null);
+    setIsBuilding(false);
   }
 
   const stockColor = () => {
@@ -61,6 +67,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
       if (lastTimestamp && lastTimestamp !== lastSegmentTime) {
         setLastSegmentTime(lastTimestamp);
         setNewDataPoint(lastDataPoint); // Trigger Workman animation
+        setIsBuilding(true);
       }
     }
   }, [minuteData, lastSegmentTime]);
@@ -76,7 +83,11 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     const visible = age >= 5000;
 
     if (timestamp === lastSegmentTime) {
-      console.log(`Newest point: age=${age}ms, visible=${visible}`);
+      if (isBuilding) {
+        return false;
+      }
+      return true;
+      
     }
 
     return visible;
@@ -91,7 +102,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
       const prevPoint = minuteData[i - 1];
       const currentPoint = minuteData[i];
       const currentPrice = currentPoint.price;
-      console.log(`Current price: ${currentPrice}`);
 
       const prevVisible = isDataPointVisible(prevPoint.timestamp);
       const currentVisible = isDataPointVisible(currentPoint.timestamp);
@@ -348,7 +358,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           xScale={xScale}
           yScale={yScale}
           newDataPoint={newDataPoint}
-          onAnimationComplete={() => setNewDataPoint(null)}
+          onBuildingComplete={handleBuildingComplete}
         />
       </svg>
     </div>

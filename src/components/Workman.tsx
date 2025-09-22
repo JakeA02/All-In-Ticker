@@ -11,7 +11,7 @@ interface WorkmanProps {
   xScale: ReturnType<typeof scaleTime<number>>;
   yScale: ReturnType<typeof scaleLinear<number>>;
   newDataPoint: StockDataPoint | null;
-  onAnimationComplete?: () => void;
+  onBuildingComplete?: () => void;
 }
 
 interface WorkmanPosition {
@@ -30,8 +30,8 @@ export const Workman: React.FC<WorkmanProps> = ({
   xScale,
   yScale,
   newDataPoint,
-  onAnimationComplete
-}) => {
+  onBuildingComplete
+}) => { 
   // Memoize rest position to prevent unnecessary re-renders
   const restPosition: WorkmanPosition = useMemo(() => ({
     x: margin + graphWidth - 10,
@@ -139,6 +139,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 
         case 'returningToY': {
           if (!startPosition) break;
+          onBuildingComplete?.();
           
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
           const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
@@ -177,7 +178,6 @@ export const Workman: React.FC<WorkmanProps> = ({
             setPosition(restPosition);
             setAnimationPhase('idle');
             setTargetDataPoint(null);
-            onAnimationComplete?.();
           } else {
             animationFrame = requestAnimationFrame(animate);
           }
@@ -196,7 +196,7 @@ export const Workman: React.FC<WorkmanProps> = ({
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [animationPhase, targetDataPoint, xScale, yScale, margin, restPosition.x, restPosition.y, onAnimationComplete, ANIMATION_DURATION, WAIT_DURATION]);
+  }, [animationPhase, targetDataPoint, xScale, yScale, margin, restPosition.x, restPosition.y, onBuildingComplete, ANIMATION_DURATION, WAIT_DURATION]);
 
   return (
     <g className="workman-overlay">

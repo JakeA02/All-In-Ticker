@@ -19,7 +19,7 @@ interface WorkmanPosition {
   y: number;
 }
 
-type AnimationPhase = 'idle' | 'movingToX' | 'movingToY' | 'waiting' | 'returning';
+type AnimationPhase = 'idle' | 'movingToX' | 'movingToY' | 'waiting' | 'returningToY' | 'returningToX';
 
 export const Workman: React.FC<WorkmanProps> = ({
   width,
@@ -71,9 +71,14 @@ export const Workman: React.FC<WorkmanProps> = ({
 
     let animationFrame: number;
     let startTime: number;
+    let startPosition: WorkmanPosition | null = null;
 
     const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
+      if (!startTime) {
+        startTime = currentTime;
+        // Capture the starting position for this animation phase
+        startPosition = { ...position };
+      }
       const elapsed = currentTime - startTime;
 
       switch (animationPhase) {
@@ -91,6 +96,7 @@ export const Workman: React.FC<WorkmanProps> = ({
           if (progress >= 1) {
             setAnimationPhase('movingToY');
             startTime = 0;
+            startPosition = null; // Reset for next phase
           } else {
             animationFrame = requestAnimationFrame(animate);
           }
@@ -98,12 +104,12 @@ export const Workman: React.FC<WorkmanProps> = ({
         }
 
         case 'movingToY': {
+          if (!startPosition) break;
+          
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
           const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
           
-          const newY = restPosition.y + (targetY - restPosition.y) * easeProgress;
-          
-          
+          const newY = startPosition.y + (targetY - startPosition.y) * easeProgress;
           
           setPosition(prev => ({
             x: prev.x,
@@ -113,6 +119,7 @@ export const Workman: React.FC<WorkmanProps> = ({
           if (progress >= 1) {
             setAnimationPhase('waiting');
             startTime = 0;
+            startPosition = null; // Reset for next phase
           } else {
             animationFrame = requestAnimationFrame(animate);
           }
@@ -121,25 +128,50 @@ export const Workman: React.FC<WorkmanProps> = ({
 
         case 'waiting': {
           if (elapsed >= WAIT_DURATION) {
-            setAnimationPhase('returning');
+            setAnimationPhase('returningToY');
             startTime = 0;
+            startPosition = null; // Reset for next phase
           } else {
             animationFrame = requestAnimationFrame(animate);
           }
           break;
         }
 
-        case 'returning': {
-          const progress = Math.min(elapsed / (ANIMATION_DURATION * 1.5), 1);
+        case 'returningToY': {
+          if (!startPosition) break;
+          
+          const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
           const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
           
-          setPosition(prev => {
-            const newX = prev.x + (restPosition.x - prev.x) * easeProgress;
-            const newY = prev.y + (restPosition.y - prev.y) * easeProgress;
+          const newY = startPosition.y + (restPosition.y - startPosition.y) * easeProgress;
+          
+          setPosition(prev => ({
+            x: prev.x, // Keep current X position
+            y: newY    // Move to rest Y position
+          }));
 
-            
-            return { x: newX, y: newY };
-          });
+          if (progress >= 1) {
+            setAnimationPhase('returningToX');
+            startTime = 0; // Reset start time for next phase
+            startPosition = null; // Reset start position for next phase
+          } else {
+            animationFrame = requestAnimationFrame(animate);
+          }
+          break;
+        }
+
+        case 'returningToX': {
+          if (!startPosition) break;
+          
+          const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+          
+          const newX = startPosition.x + (restPosition.x - startPosition.x) * easeProgress;
+          
+          setPosition(prev => ({
+            x: newX,   // Move to rest X position
+            y: prev.y  // Keep current Y position
+          }));
 
           if (progress >= 1) {
             setPosition(restPosition);

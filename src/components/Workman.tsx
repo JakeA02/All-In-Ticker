@@ -34,7 +34,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 }) => { 
   // Memoize rest position to prevent unnecessary re-renders
   const restPosition: WorkmanPosition = useMemo(() => ({
-    x: margin + graphWidth - 10,
+    x: margin + graphWidth - 20,
     y: margin + graphHeight - 10
   }), [margin, graphWidth, graphHeight]);
 
@@ -214,6 +214,18 @@ export const Workman: React.FC<WorkmanProps> = ({
     setShowLadder(height > 20); // Only show ladder for significant Y movements
   };
 
+  const PokerChips = () => {
+    const chipPath = `/images/chips/mystack.png`;
+    return (
+      <image
+      href={chipPath}
+      x={750}
+      y={375}
+      width={35}
+      height={35}
+    />
+    )
+  }
   // Ladder rendering function
   const renderLadder = () => {
     if (!showLadder || ladderHeight === 0) return null;
@@ -262,7 +274,7 @@ export const Workman: React.FC<WorkmanProps> = ({
     <g className="workman-overlay">
       {/* Render ladder first (behind workman) */}
       {renderLadder()}
-      
+
       {/* Existing workman circle */}
       <circle
         cx={position.x}
@@ -289,6 +301,7 @@ export const Workman: React.FC<WorkmanProps> = ({
       >
         W
       </text>
+      <PokerChips />
     </g>
   );
 };

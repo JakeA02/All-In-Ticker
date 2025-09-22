@@ -10,6 +10,10 @@ import { Workman } from "./Workman";
 
 type CurveType = keyof typeof allCurves;
 
+// Poker chip colors
+const CHIP_COLORS = ['Blue', 'Burgundy', 'Pink', 'Purple', 'Red'] as const;
+type ChipColor = typeof CHIP_COLORS[number];
+
 export interface StockCurveChartProps {
   width: number;
   height: number;
@@ -20,6 +24,35 @@ export interface StockCurveChartProps {
 // Data accessors for stock data points
 const getX = (d: StockDataPoint) => new Date(d.timestamp);
 const getY = (d: StockDataPoint) => d.price;
+
+// Function to get a consistent chip color for a data point
+const getChipColor = (dataPoint: StockDataPoint, index: number): ChipColor => {
+  // Use a combination of timestamp and index to create consistent but varied colors
+  const seed = dataPoint.timestamp + index;
+  return CHIP_COLORS[seed % CHIP_COLORS.length];
+};
+
+// Poker Chip SVG Component
+interface PokerChipProps {
+  color: ChipColor;
+  x: number;
+  y: number;
+  size?: number;
+}
+
+const PokerChip: React.FC<PokerChipProps> = ({ color, x, y, size = 16 }) => {
+  const chipPath = `/images/chips/${color}.svg`;
+  
+  return (
+    <image
+      href={chipPath}
+      x={x - size/2}
+      y={y - size/2}
+      width={size}
+      height={size}
+    />
+  );
+};
 
 export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   width,
@@ -285,30 +318,38 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             />
           ))}
 
-          {/* Draw individual points */}
+          {/* Draw individual points as poker chips */}
           {showPoints &&
             visibleData.filter(d => isDataPointVisible(d.timestamp)).map((d, i) => (
-              <circle
+              <PokerChip
                 key={i}
-                cx={xScale(getX(d))}
-                cy={yScale(getY(d))}
-                r={2}
-                fill={stockColor()}
-                stroke="white"
-                strokeWidth={1}
+                color={getChipColor(d, i)}
+                x={xScale(getX(d))}
+                y={yScale(getY(d))}
+                size={16}
               />
             ))}
 
-          {/* Highlight the most recent point */}
+          {/* Highlight the most recent point with a larger poker chip */}
           {visibleData.length > 0 && isDataPointVisible(visibleData[visibleData.length - 1].timestamp) && (
-            <circle
-              cx={xScale(getX(visibleData[visibleData.length - 1]))}
-              cy={yScale(getY(visibleData[visibleData.length - 1]))}
-              r={4}
-              fill="#6e1bf2"
-              stroke="white"
-              strokeWidth={2}
-            />
+            <>
+              <PokerChip
+                color={getChipColor(visibleData[visibleData.length - 1], visibleData.length - 1)}
+                x={xScale(getX(visibleData[visibleData.length - 1]))}
+                y={yScale(getY(visibleData[visibleData.length - 1]))}
+                size={24}
+              />
+              {/* Add a subtle glow effect around the most recent chip */}
+              {/* <circle
+                cx={xScale(getX(visibleData[visibleData.length - 1]))}
+                cy={yScale(getY(visibleData[visibleData.length - 1]))}
+                r={14}
+                fill="none"
+                stroke="#FFD524"
+                strokeWidth={2}
+                opacity={0.6}
+              /> */}
+            </>
           )}
         </Group>
 

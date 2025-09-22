@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { extent, max, min } from "@visx/vendor/d3-array";
 import * as allCurves from "@visx/curve";
 import { Group } from "@visx/group";
@@ -27,6 +27,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 }) => {
   const [curveType, setCurveType] = useState<CurveType>("curveLinear");
   const [showPoints, setShowPoints] = useState<boolean>(true);
+  const [lastSegmentTime, setLastSegmentTime] = useState<number | null>(null);
 
   const { stockData, isLoading, error } = useFinnhubStock();
 
@@ -41,8 +42,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     return stockIsUp() ? "#00E676" : "#FF5252";
   }
 
-  
-
   const svgHeight = showControls ? height - 40 : height;
   const MARGIN = 40;
   const graphWidth = width - MARGIN * 2;
@@ -51,6 +50,58 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   // Get the minute data from stock data
   const minuteData = stockData?.minuteData || [];
 
+  // Effect to track when new segments are added
+  useEffect(() => {
+    if (minuteData.length > 0) {
+      const lastDataPoint = minuteData[minuteData.length - 1];
+      const lastTimestamp = lastDataPoint?.timestamp;
+
+      if (lastTimestamp && lastTimestamp !== lastSegmentTime) {
+        setLastSegmentTime(lastTimestamp);
+      }
+    }
+  }, [minuteData, lastSegmentTime]);
+
+  // Helper function to check if a data point is old enough to be visible
+  const isDataPointVisible = (timestamp: number) => {
+    if (!lastSegmentTime) {
+      console.log("No lastSegmentTime, showing all points");
+      return true;
+    }
+
+    const age = Date.now() - timestamp;
+    const visible = age >= 5000;
+
+    if (timestamp === lastSegmentTime) {
+      console.log(`Newest point: age=${age}ms, visible=${visible}`);
+    }
+
+    return visible;
+  };
+
+  // Get visible segments for rendering
+  const getVisibleSegments = () => {
+    if (minuteData.length <= 1) return [];
+
+    const segments = [];
+    for (let i = 1; i < minuteData.length; i++) {
+      const prevPoint = minuteData[i - 1];
+      const currentPoint = minuteData[i];
+      const currentPrice = currentPoint.price;
+      console.log(`Current price: ${currentPrice}`);
+
+      const prevVisible = isDataPointVisible(prevPoint.timestamp);
+      const currentVisible = isDataPointVisible(currentPoint.timestamp);
+
+      if (prevVisible && currentVisible) {
+        segments.push([prevPoint, currentPoint]);
+      }
+    }
+
+    console.log(`Total segments: ${minuteData.length - 1}, Visible segments: ${segments.length}`);
+    return segments;
+  };
+
   // Use all available data (no animation)
   const visibleData = minuteData;
 
@@ -58,7 +109,13 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const xScale = scaleTime<number>({
     domain:
       minuteData.length > 0
-        ? (extent(minuteData, getX) as [Date, Date])
+        ? (() => {
+            const [minDate, maxDate] = extent(minuteData, getX) as [Date, Date];
+            const timeRange = maxDate.getTime() - minDate.getTime();
+            const padding = timeRange * 0.1; // 10% padding
+            const paddedMaxDate = new Date(maxDate.getTime() + padding);
+            return [minDate, paddedMaxDate];
+          })()
         : [new Date(Date.now() - 60000), new Date()],
     range: [0, graphWidth],
   });
@@ -200,11 +257,12 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 
         {/* Main chart group */}
         <Group left={MARGIN + 10} top={MARGIN}>
-          {/* Draw the curve line */}
-          {visibleData.length > 1 && (
+          {/* Draw visible curve segments */}
+          {getVisibleSegments().map((segment, segmentIndex) => (
             <LinePath<StockDataPoint>
+              key={`segment-${segmentIndex}`}
               curve={allCurves[curveType]}
-              data={visibleData}
+              data={segment}
               x={(d) => xScale(getX(d)) ?? 0}
               y={(d) => yScale(getY(d)) ?? 0}
               stroke={stockColor()}
@@ -212,11 +270,11 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               fill="none"
               shapeRendering="geometricPrecision"
             />
-          )}
+          ))}
 
           {/* Draw individual points */}
           {showPoints &&
-            visibleData.map((d, i) => (
+            visibleData.filter(d => isDataPointVisible(d.timestamp)).map((d, i) => (
               <circle
                 key={i}
                 cx={xScale(getX(d))}
@@ -229,7 +287,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             ))}
 
           {/* Highlight the most recent point */}
-          {visibleData.length > 0 && (
+          {visibleData.length > 0 && isDataPointVisible(visibleData[visibleData.length - 1].timestamp) && (
             <circle
               cx={xScale(getX(visibleData[visibleData.length - 1]))}
               cy={yScale(getY(visibleData[visibleData.length - 1]))}

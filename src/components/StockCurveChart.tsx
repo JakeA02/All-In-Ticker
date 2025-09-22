@@ -270,7 +270,23 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             {stockData?.symbol} ({stockIsUp() ? "+" : ""}{stockData?.changeOverDayPercent.toFixed(2)}%)
           </text>
 
+          <text
+            x={MARGIN + graphWidth - 50}
+            y={MARGIN - 10}
+            textAnchor="middle"
+            fontSize={20}
+            fill="gray"
+          >
+          {new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          }).format(new Date())}
+          </text>
+
         </Group>
+        
 
         {/* Grid lines */}
         <Group left={MARGIN} top={MARGIN}>

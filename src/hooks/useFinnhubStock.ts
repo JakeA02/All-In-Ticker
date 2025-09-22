@@ -4,7 +4,7 @@ import { StockPrice, FinnhubQuote, StockDataPoint } from '../types/stock';
 import { generateMockStockData } from '../utils/mockData';
 
 const FINNHUB_API_KEY = process.env.REACT_APP_FINNHUB_API_KEY;
-const POLLING_INTERVAL = 60000; 
+const POLLING_INTERVAL = process.env.REACT_APP_POLLING_INTERVAL ? parseInt(process.env.REACT_APP_POLLING_INTERVAL) : 60000; 
 
 export const useFinnhubStock = (symbol: string = 'AAPL') => {
   const { useMockData } = useStock();

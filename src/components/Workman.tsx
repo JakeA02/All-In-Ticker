@@ -214,13 +214,13 @@ export const Workman: React.FC<WorkmanProps> = ({
     setShowLadder(height > 20); // Only show ladder for significant Y movements
   };
 
-  const PokerChips = () => {
+  const ChipStack = () => {
     const chipPath = `/images/chips/mystack.png`;
     return (
       <image
       href={chipPath}
       x={750}
-      y={375}
+      y={370}
       width={35}
       height={35}
     />
@@ -301,7 +301,7 @@ export const Workman: React.FC<WorkmanProps> = ({
       >
         W
       </text>
-      <PokerChips />
+      <ChipStack />
     </g>
   );
 };

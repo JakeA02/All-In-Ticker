@@ -42,6 +42,11 @@ export const Workman: React.FC<WorkmanProps> = ({
   const [animationPhase, setAnimationPhase] = useState<AnimationPhase>('idle');
   const [targetDataPoint, setTargetDataPoint] = useState<StockDataPoint | null>(null);
 
+  // Add ladder-related state
+  const [showLadder, setShowLadder] = useState<boolean>(false);
+  const [ladderHeight, setLadderHeight] = useState<number>(0);
+  const [ladderX, setLadderX] = useState<number>(0);
+
   // Animation parameters
   const ANIMATION_DURATION = 1000; // 1 second for each movement
   const WAIT_DURATION = 5000; // 5 seconds wait at data point
@@ -94,9 +99,11 @@ export const Workman: React.FC<WorkmanProps> = ({
           }));
 
           if (progress >= 1) {
+            // Calculate ladder before moving to Y
+            calculateLadder(position.y, targetY, targetX);
             setAnimationPhase('movingToY');
             startTime = 0;
-            startPosition = null; // Reset for next phase
+            startPosition = null;
           } else {
             animationFrame = requestAnimationFrame(animate);
           }
@@ -152,6 +159,7 @@ export const Workman: React.FC<WorkmanProps> = ({
           }));
 
           if (progress >= 1) {
+            setShowLadder(false); // Hide ladder when returning
             setAnimationPhase('returningToX');
             startTime = 0; // Reset start time for next phase
             startPosition = null; // Reset start position for next phase
@@ -198,8 +206,64 @@ export const Workman: React.FC<WorkmanProps> = ({
     };
   }, [animationPhase, targetDataPoint, xScale, yScale, margin, restPosition.x, restPosition.y, onBuildingComplete, ANIMATION_DURATION, WAIT_DURATION]);
 
+  // Calculate ladder properties when starting Y movement
+  const calculateLadder = (startY: number, targetY: number, x: number) => {
+    const height = Math.abs(targetY - startY);
+    setLadderHeight(height);
+    setLadderX(x);
+    setShowLadder(height > 20); // Only show ladder for significant Y movements
+  };
+
+  // Ladder rendering function
+  const renderLadder = () => {
+    if (!showLadder || ladderHeight === 0) return null;
+
+    const rungs = Math.floor(ladderHeight / 15); // Rung every 15 pixels
+    const ladderWidth = 12;
+    const startY = Math.min(position.y, targetDataPoint ? margin + (yScale(targetDataPoint.price) ?? 0) : position.y);
+
+    return (
+      <g className="ladder">
+        {/* Left rail */}
+        <line
+          x1={ladderX - ladderWidth/2}
+          y1={startY}
+          x2={ladderX - ladderWidth/2}
+          y2={startY + ladderHeight}
+          stroke="#8B4513"
+          strokeWidth={2}
+        />
+        {/* Right rail */}
+        <line
+          x1={ladderX + ladderWidth/2}
+          y1={startY}
+          x2={ladderX + ladderWidth/2}
+          y2={startY + ladderHeight}
+          stroke="#8B4513"
+          strokeWidth={2}
+        />
+        {/* Rungs */}
+        {Array.from({ length: rungs }, (_, i) => (
+          <line
+            key={i}
+            x1={ladderX - ladderWidth/2}
+            y1={startY + (i + 1) * (ladderHeight / (rungs + 1))}
+            x2={ladderX + ladderWidth/2}
+            y2={startY + (i + 1) * (ladderHeight / (rungs + 1))}
+            stroke="#8B4513"
+            strokeWidth={1.5}
+          />
+        ))}
+      </g>
+    );
+  };
+
   return (
     <g className="workman-overlay">
+      {/* Render ladder first (behind workman) */}
+      {renderLadder()}
+      
+      {/* Existing workman circle */}
       <circle
         cx={position.x}
         cy={position.y}
@@ -212,7 +276,8 @@ export const Workman: React.FC<WorkmanProps> = ({
           transition: animationPhase === 'idle' ? 'all 0.3s ease' : 'none'
         }}
       />
-      {/* Optional: Add a small label */}
+      
+      {/* Existing workman label */}
       <text
         x={position.x}
         y={position.y - 12}

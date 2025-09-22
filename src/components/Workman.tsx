@@ -219,8 +219,8 @@ export const Workman: React.FC<WorkmanProps> = ({
     return (
       <image
       href={chipPath}
-      x={750}
-      y={370}
+      x={margin + graphWidth - 10}
+      y={margin + graphHeight - 30}
       width={35}
       height={35}
     />

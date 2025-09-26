@@ -28,7 +28,7 @@ const App: React.FC = () => {
                 <PixiCanvas width={800} height={480} />
               </>
             ) : (
-              <img className="markets-closed-image" src="/images/All-In-Poker.png" alt="Markets Closed" />
+              <img className="markets-closed-image" src="/images/All-In-End-Screen.png" alt="Markets Closed" />
             )}
           </div>
 

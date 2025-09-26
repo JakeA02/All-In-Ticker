@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StockDataPoint } from '../types/stock';
 import { scaleTime, scaleLinear } from '@visx/scale';
+import { PixelCharacter } from './PixelCharacter';
+import { CharacterState, CharacterDirection } from '../hooks/useCharacterAnimation';
 
 interface WorkmanProps {
   width: number;
@@ -35,7 +37,7 @@ export const Workman: React.FC<WorkmanProps> = ({
   // Memoize rest position to prevent unnecessary re-renders
   const restPosition: WorkmanPosition = useMemo(() => ({
     x: margin + graphWidth - 20,
-    y: margin + graphHeight - 10
+    y: margin + graphHeight - 35
   }), [margin, graphWidth, graphHeight]);
 
   const [position, setPosition] = useState<WorkmanPosition>(restPosition);
@@ -50,6 +52,36 @@ export const Workman: React.FC<WorkmanProps> = ({
   // Animation parameters
   const ANIMATION_DURATION = 1000; // 1 second for each movement
   const WAIT_DURATION = 5000; // 5 seconds wait at data point
+
+  // Map animation phases to character states
+  const getCharacterState = (phase: AnimationPhase): CharacterState => {
+    switch (phase) {
+      case 'movingToX':
+      case 'movingToY':
+      case 'returningToY':
+      case 'returningToX':
+        return 'walking';
+      case 'idle':
+      case 'waiting':
+      default:
+        return 'standing';
+    }
+  };
+
+  // Determine character direction based on animation phase
+  const getCharacterDirection = (phase: AnimationPhase): CharacterDirection => {
+    switch (phase) {
+      case 'returningToX': // Moving left back to rest position
+      case 'returningToY': // Coming down the ladder (facing left)
+        return 'left';
+      case 'movingToX':   // Moving right to data point
+      case 'movingToY':   // Going up the ladder (facing right)
+      case 'idle':
+      case 'waiting':
+      default:
+        return 'right';
+    }
+  };
 
   // Update position when rest position changes (e.g., graph resize)
   useEffect(() => {
@@ -275,32 +307,16 @@ export const Workman: React.FC<WorkmanProps> = ({
       {/* Render ladder first (behind workman) */}
       {renderLadder()}
 
-      {/* Existing workman circle */}
-      <circle
-        cx={position.x}
-        cy={position.y}
-        r={6}
-        fill="#2196F3"
-        stroke="#1976D2"
-        strokeWidth={2}
-        style={{
-          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
-          transition: animationPhase === 'idle' ? 'all 0.3s ease' : 'none'
-        }}
-      />
-      
-      {/* Existing workman label */}
-      <text
+      {/* Pixel character workman */}
+      <PixelCharacter
+        characterName="chamath"
         x={position.x}
-        y={position.y - 12}
-        textAnchor="middle"
-        fontSize={8}
-        fill="#2196F3"
-        fontWeight="bold"
-        style={{ userSelect: 'none' }}
-      >
-        W
-      </text>
+        y={position.y}
+        state={getCharacterState(animationPhase)}
+        direction={getCharacterDirection(animationPhase)}
+        size={84}
+        frameDuration={300}
+      />
       <ChipStack />
     </g>
   );

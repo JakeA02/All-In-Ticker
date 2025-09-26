@@ -3,6 +3,7 @@ import { StockDataPoint } from '../types/stock';
 import { scaleTime, scaleLinear } from '@visx/scale';
 import { PixelCharacter } from './PixelCharacter';
 import { CharacterState, CharacterDirection } from '../hooks/useCharacterAnimation';
+import { currentCharacterStockData } from '../utils/CharacterStockData';
 
 interface WorkmanProps {
   width: number;
@@ -309,7 +310,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 
       {/* Pixel character workman */}
       <PixelCharacter
-        characterName="chamath"
+        characterName={currentCharacterStockData()?.character ?? 'charlie'}
         x={position.x}
         y={position.y}
         state={getCharacterState(animationPhase)}

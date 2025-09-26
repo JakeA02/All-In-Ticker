@@ -7,6 +7,7 @@ import { scaleTime, scaleLinear } from "@visx/scale";
 import { StockDataPoint } from "../types/stock";
 import { useFinnhubStock } from "../hooks/useFinnhubStock";
 import { Workman } from "./Workman";
+import { currentCharacterStockData } from '../utils/CharacterStockData';
 
 type CurveType = keyof typeof allCurves;
 
@@ -65,7 +66,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [newDataPoint, setNewDataPoint] = useState<StockDataPoint | null>(null);
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
 
-  const { stockData, isLoading, error } = useFinnhubStock();
+  const { stockData, isLoading, error } = useFinnhubStock(currentCharacterStockData()?.stock);
 
 
   const stockIsUp = () => {

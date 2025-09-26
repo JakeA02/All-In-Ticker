@@ -56,7 +56,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 
   // Animation parameters
   const ANIMATION_DURATION = 1000; // 1 second for each movement
-  const WAIT_DURATION = 5000; // 5 seconds wait at data point
+  const WAIT_DURATION = 3000; // 3 seconds wait at data point
 
   // Map animation phases to character states
   const getCharacterState = (phase: AnimationPhase): CharacterState => {

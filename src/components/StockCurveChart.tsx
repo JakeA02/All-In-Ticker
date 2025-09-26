@@ -65,6 +65,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [lastSegmentTime, setLastSegmentTime] = useState<number | null>(null);
   const [newDataPoint, setNewDataPoint] = useState<StockDataPoint | null>(null);
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
+  const [currentChipColor, setCurrentChipColor] = useState<string | null>(null);
+  const [currentChipIndex, setCurrentChipIndex] = useState<number | null>(null);
 
   const { stockData, isLoading, error } = useFinnhubStock(currentCharacterStockData()?.stock);
 
@@ -78,6 +80,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const handleBuildingComplete = () => {
     setNewDataPoint(null);
     setIsBuilding(false);
+    setCurrentChipColor(null);
+    setCurrentChipIndex(null);
   }
 
   const stockColor = () => {
@@ -102,6 +106,12 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
         setLastSegmentTime(lastTimestamp);
         setNewDataPoint(lastDataPoint); // Trigger Workman animation
         setIsBuilding(true);
+        
+        // Set the chip color and index for the workman to carry
+        const chipIndex = minuteData.length - 1;
+        const chipColor = getChipColor(lastDataPoint, chipIndex);
+        setCurrentChipColor(chipColor);
+        setCurrentChipIndex(chipIndex);
       }
     }
   }, [minuteData, lastSegmentTime]);
@@ -416,6 +426,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           xScale={xScale}
           yScale={yScale}
           newDataPoint={newDataPoint}
+          chipColor={currentChipColor ?? undefined}
+          chipIndex={currentChipIndex ?? undefined}
           onBuildingComplete={handleBuildingComplete}
         />
       </svg>

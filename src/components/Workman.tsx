@@ -14,6 +14,8 @@ interface WorkmanProps {
   xScale: ReturnType<typeof scaleTime<number>>;
   yScale: ReturnType<typeof scaleLinear<number>>;
   newDataPoint: StockDataPoint | null;
+  chipColor?: string;
+  chipIndex?: number;
   onBuildingComplete?: () => void;
 }
 
@@ -33,6 +35,8 @@ export const Workman: React.FC<WorkmanProps> = ({
   xScale,
   yScale,
   newDataPoint,
+  chipColor,
+  chipIndex,
   onBuildingComplete
 }) => { 
   // Memoize rest position to prevent unnecessary re-renders
@@ -259,6 +263,36 @@ export const Workman: React.FC<WorkmanProps> = ({
     />
     )
   }
+
+  // Carried poker chip component
+  const CarriedPokerChip = () => {
+    // Show carried chip during movement phases but hide when workman is waiting or returning
+    if (!chipColor || animationPhase === 'idle' || animationPhase === 'waiting' || animationPhase === 'returningToY' || animationPhase === 'returningToX') {
+      return null;
+    }
+
+    const chipPath = `/images/chips/${chipColor}.svg`;
+    const chipSize = 20;
+    
+    // Position the chip slightly above and in front of the character based on direction
+    const direction = getCharacterDirection(animationPhase);
+    const offsetX = direction === 'right' ? -15 : -15;
+    const chipX = position.x + offsetX;
+    const chipY = position.y + 8; // Slightly higher to look like it's being carried
+
+    return (
+      <image
+        href={chipPath}
+        x={chipX - chipSize/2}
+        y={chipY - chipSize/2}
+        width={chipSize}
+        height={chipSize}
+        style={{
+          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
+        }}
+      />
+    );
+  };
   // Ladder rendering function
   const renderLadder = () => {
     if (!showLadder || ladderHeight === 0) return null;
@@ -310,7 +344,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 
       {/* Pixel character workman */}
       <PixelCharacter
-        characterName={currentCharacterStockData()?.character ?? 'charlie'}
+        characterName={currentCharacterStockData()?.character ?? "charlie"}
         x={position.x}
         y={position.y}
         state={getCharacterState(animationPhase)}
@@ -318,6 +352,10 @@ export const Workman: React.FC<WorkmanProps> = ({
         size={84}
         frameDuration={300}
       />
+      
+      {/* Carried poker chip (renders above character) */}
+      <CarriedPokerChip />
+      
       <ChipStack />
     </g>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StockProvider } from "./context/StockContext";
 import { PixiCanvas } from "./components/PixiCanvas";
 import { StockCurveChart } from "./components/StockCurveChart";
@@ -7,7 +7,12 @@ import "./App.css";
 import { currentCharacterStockData } from "./utils/CharacterStockData";
 
 const App: React.FC = () => {
-  const isMarketClosed = !currentCharacterStockData();
+  const [isMarketClosed, setIsMarketClosed] = useState(false);
+
+  setInterval(() => {
+    setIsMarketClosed(!currentCharacterStockData());
+  }, 60000);
+
   return (
     <StockProvider>
       <div className="App">
@@ -28,7 +33,11 @@ const App: React.FC = () => {
                 <PixiCanvas width={800} height={480} />
               </>
             ) : (
-              <img className="markets-closed-image" src="/images/All-In-End-Screen.png" alt="Markets Closed" />
+              <img
+                className="markets-closed-image"
+                src="/images/All-In-End-Screen.png"
+                alt="Markets Closed"
+              />
             )}
           </div>
 

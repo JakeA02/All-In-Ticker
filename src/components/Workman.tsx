@@ -55,7 +55,7 @@ export const Workman: React.FC<WorkmanProps> = ({
   const [ladderX, setLadderX] = useState<number>(0);
 
   // Animation parameters
-  const ANIMATION_DURATION = 1000; // 1 second for each movement
+  const ANIMATION_DURATION = 1500; // 1 second for each movement
   const WAIT_DURATION = 3000; // 3 seconds wait at data point
 
   // Map animation phases to character states

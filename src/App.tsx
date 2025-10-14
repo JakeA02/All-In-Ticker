@@ -1,16 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StockProvider } from "./context/StockContext";
 import { PixiCanvas } from "./components/PixiCanvas";
 import { StockCurveChart } from "./components/StockCurveChart";
 import { ControlPanel } from "./components/ControlPanel";
 import "./App.css";
-import { currentCharacterStockData } from "./utils/CharacterStockData";
 
 const App: React.FC = () => {
   const [isMarketClosed, setIsMarketClosed] = useState(false);
+  const [isHoliday, setIsHoliday] = useState(false);
 
-  setInterval(() => {
-    setIsMarketClosed(!currentCharacterStockData());
+  const fetchMarketStatus = async () => {
+    const response = await fetch(
+      `https://finnhub.io/api/v1/stock/market-status?exchange=US&token=${process.env.REACT_APP_FINNHUB_API_KEY}`
+    );
+    const data = await response.json();
+    setIsMarketClosed(!data.isOpen);
+    setIsHoliday(data.holiday);
+  };
+  useEffect(() => {
+    fetchMarketStatus();
+  }, []);
+
+  setInterval(async () => {
+    fetchMarketStatus();
   }, 60000);
 
   return (
@@ -39,10 +51,6 @@ const App: React.FC = () => {
                 alt="Markets Closed"
               />
             )}
-          </div>
-
-          <div className="controls-container">
-            <ControlPanel />
           </div>
         </main>
       </div>

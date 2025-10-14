@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as PIXI from 'pixi.js';
 
 interface PixiCanvasProps {
@@ -7,11 +7,33 @@ interface PixiCanvasProps {
 }
 
 export const PixiCanvas: React.FC<PixiCanvasProps> = ({ 
-  width = 800, 
-  height = 480 
+  width: propWidth, 
+  height: propHeight 
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
+  const [dimensions, setDimensions] = useState({
+    width: propWidth || window.innerWidth,
+    height: propHeight || window.innerHeight
+  });
+
+  const width = propWidth || dimensions.width;
+  const height = propHeight || dimensions.height;
+
+  // Handle window resize
+  useEffect(() => {
+    if (propWidth && propHeight) return;
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [propWidth, propHeight]);
 
   // Initialize PIXI application - minimal setup for future animations
   useEffect(() => {

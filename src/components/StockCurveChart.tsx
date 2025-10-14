@@ -16,8 +16,8 @@ const CHIP_COLORS = ['Blue', 'Burgundy', 'Pink', 'Purple', 'Red'] as const;
 type ChipColor = typeof CHIP_COLORS[number];
 
 export interface StockCurveChartProps {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   showControls?: boolean;
 }
 
@@ -56,8 +56,8 @@ const PokerChip: React.FC<PokerChipProps> = ({ color, x, y, size = 16 }) => {
 };
 
 export const StockCurveChart: React.FC<StockCurveChartProps> = ({
-  width,
-  height,
+  width: propWidth,
+  height: propHeight,
   showControls = false,
 }) => {
   const [curveType, setCurveType] = useState<CurveType>("curveLinear");
@@ -67,8 +67,30 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
   const [currentChipColor, setCurrentChipColor] = useState<string | null>(null);
   const [currentChipIndex, setCurrentChipIndex] = useState<number | null>(null);
+  const [dimensions, setDimensions] = useState({ 
+    width: propWidth || window.innerWidth, 
+    height: propHeight || window.innerHeight 
+  });
 
   const { stockData, isLoading, error } = useFinnhubStock(currentCharacterStockData()?.stock);
+
+  // Handle window resize
+  useEffect(() => {
+    if (propWidth && propHeight) return; // Don't resize if dimensions are provided
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [propWidth, propHeight]);
+
+  const width = propWidth || dimensions.width;
+  const height = propHeight || dimensions.height;
 
 
   const stockIsUp = () => {
@@ -239,11 +261,11 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   }
 
   return (
-    <div className="stock-curve-chart">
+    <div className="stock-curve-chart" style={{ width: '100%', height: '100%' }}>
       <svg
         width={width}
         height={svgHeight}
-        style={{ border: "5px solid #ccc" }}
+        style={{ border: "none", display: "block" }}
       >
         {/* Background */}
         <rect width={width} height={svgHeight} fill="#1B1F3B" />

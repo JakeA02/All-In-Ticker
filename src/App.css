@@ -4,51 +4,28 @@
   box-sizing: border-box;
 }
 
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 .App {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100vw;
+  height: 100vh;
+  background: #000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
-}
-
-.app-header {
-  text-align: center;
-  padding: 20px;
-  color: white;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
-
-.app-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.app-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.app-main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-  flex-wrap: wrap;
+  overflow: hidden;
 }
 
 .canvas-container {
   position: relative;
-  border: 3px solid #fff;
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: #000;
 }
 
 .pixi-canvas-container {

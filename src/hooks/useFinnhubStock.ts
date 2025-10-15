@@ -87,7 +87,6 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
           minuteData: updatedAccumulatedData
         };
         
-        console.log('New stock data with minute data:', newStockData);
       }
 
       setStockData(newStockData);

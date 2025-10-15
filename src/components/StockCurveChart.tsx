@@ -7,20 +7,19 @@ import { scaleTime, scaleLinear } from "@visx/scale";
 import { StockDataPoint } from "../types/stock";
 import { useFinnhubStock } from "../hooks/useFinnhubStock";
 import { Workman } from "./Workman";
-import { currentCharacterStockData } from '../utils/CharacterStockData';
+import { currentCharacterStockData } from "../utils/CharacterStockData";
 
 type CurveType = keyof typeof allCurves;
 
 // Poker chip colors
-const CHIP_COLORS = ['Blue', 'Burgundy', 'Pink', 'Purple', 'Red'] as const;
-type ChipColor = typeof CHIP_COLORS[number];
+const CHIP_COLORS = ["Blue", "Burgundy", "Pink", "Purple", "Red"] as const;
+type ChipColor = (typeof CHIP_COLORS)[number];
 
 export interface StockCurveChartProps {
   width?: number;
   height?: number;
   showControls?: boolean;
 }
-
 
 // Data accessors for stock data points
 const getX = (d: StockDataPoint) => new Date(d.timestamp);
@@ -43,12 +42,12 @@ interface PokerChipProps {
 
 const PokerChip: React.FC<PokerChipProps> = ({ color, x, y, size = 16 }) => {
   const chipPath = `/images/chips/${color}.svg`;
-  
+
   return (
     <image
       href={chipPath}
-      x={x - size/2}
-      y={y - size/2}
+      x={x - size / 2}
+      y={y - size / 2}
       width={size}
       height={size}
     />
@@ -67,12 +66,14 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
   const [currentChipColor, setCurrentChipColor] = useState<string | null>(null);
   const [currentChipIndex, setCurrentChipIndex] = useState<number | null>(null);
-  const [dimensions, setDimensions] = useState({ 
-    width: propWidth || window.innerWidth, 
-    height: propHeight || window.innerHeight 
+  const [dimensions, setDimensions] = useState({
+    width: propWidth || window.innerWidth,
+    height: propHeight || window.innerHeight,
   });
 
-  const { stockData, isLoading, error } = useFinnhubStock(currentCharacterStockData()?.stock);
+  const { stockData, isLoading, error } = useFinnhubStock(
+    currentCharacterStockData()?.stock
+  );
 
   // Handle window resize
   useEffect(() => {
@@ -81,34 +82,35 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     const handleResize = () => {
       setDimensions({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [propWidth, propHeight]);
 
   const width = propWidth || dimensions.width;
   const height = propHeight || dimensions.height;
 
-
   const stockIsUp = () => {
-    return stockData?.previousClose &&
+    return (
+      stockData?.previousClose &&
       stockData?.current &&
       stockData?.previousClose < stockData?.current
-  }
+    );
+  };
 
   const handleBuildingComplete = () => {
     setNewDataPoint(null);
     setIsBuilding(false);
     setCurrentChipColor(null);
     setCurrentChipIndex(null);
-  }
+  };
 
   const stockColor = () => {
     return stockIsUp() ? "#00E676" : "#FF5252";
-  }
+  };
 
   const svgHeight = showControls ? height - 40 : height;
   const MARGIN = 40;
@@ -128,7 +130,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
         setLastSegmentTime(lastTimestamp);
         setNewDataPoint(lastDataPoint); // Trigger Workman animation
         setIsBuilding(true);
-        
+
         // Set the chip color and index for the workman to carry
         const chipIndex = minuteData.length - 1;
         const chipColor = getChipColor(lastDataPoint, chipIndex);
@@ -141,7 +143,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   // Helper function to check if a data point is old enough to be visible
   const isDataPointVisible = (timestamp: number) => {
     if (!lastSegmentTime) {
-      console.log("No lastSegmentTime, showing all points");
       return true;
     }
 
@@ -153,7 +154,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
         return false;
       }
       return true;
-      
     }
 
     return visible;
@@ -167,7 +167,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     for (let i = 1; i < minuteData.length; i++) {
       const prevPoint = minuteData[i - 1];
       const currentPoint = minuteData[i];
-      const currentPrice = currentPoint.price;
 
       const prevVisible = isDataPointVisible(prevPoint.timestamp);
       const currentVisible = isDataPointVisible(currentPoint.timestamp);
@@ -177,9 +176,9 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
       }
     }
 
-    console.log(`Total segments: ${minuteData.length - 1}, Visible segments: ${segments.length}`);
     return segments;
   };
+
 
   // Use all available data (no animation)
   const visibleData = minuteData;
@@ -261,7 +260,10 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   }
 
   return (
-    <div className="stock-curve-chart" style={{ width: '100%', height: '100%' }}>
+    <div
+      className="stock-curve-chart"
+      style={{ width: "100%", height: "100%" }}
+    >
       <svg
         width={width}
         height={svgHeight}
@@ -300,7 +302,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             fontSize={20}
             fill={stockColor()}
           >
-            {stockData?.symbol} ({stockIsUp() ? "+" : ""}{stockData?.changeOverDayPercent.toFixed(2)}%)
+            {stockData?.symbol} ({stockIsUp() ? "+" : ""}
+            {stockData?.changeOverDayPercent.toFixed(2)}%)
           </text>
 
           <text
@@ -310,16 +313,14 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             fontSize={20}
             fill="gray"
           >
-          {new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/New_York',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true
-          }).format(new Date())}
+            {new Intl.DateTimeFormat("en-US", {
+              timeZone: "America/New_York",
+              hour: "numeric",
+              minute: "numeric",
+              hour12: true,
+            }).format(new Date())}
           </text>
-
         </Group>
-        
 
         {/* Grid lines */}
         <Group left={MARGIN} top={MARGIN}>
@@ -369,27 +370,35 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 
           {/* Draw individual points as poker chips */}
           {showPoints &&
-            visibleData.filter(d => isDataPointVisible(d.timestamp)).map((d, i) => (
-              <PokerChip
-                key={i}
-                color={getChipColor(d, i)}
-                x={xScale(getX(d))}
-                y={yScale(getY(d))}
-                size={16}
-              />
-            ))}
+            visibleData
+              .filter((d) => isDataPointVisible(d.timestamp))
+              .map((d, i) => (
+                <PokerChip
+                  key={i}
+                  color={getChipColor(d, i)}
+                  x={xScale(getX(d))}
+                  y={yScale(getY(d))}
+                  size={16}
+                />
+              ))}
 
           {/* Highlight the most recent point with a larger poker chip */}
-          {visibleData.length > 0 && isDataPointVisible(visibleData[visibleData.length - 1].timestamp) && (
-            <>
-              <PokerChip
-                color={getChipColor(visibleData[visibleData.length - 1], visibleData.length - 1)}
-                x={xScale(getX(visibleData[visibleData.length - 1]))}
-                y={yScale(getY(visibleData[visibleData.length - 1]))}
-                size={24}
-              />
-              {/* Add a subtle glow effect around the most recent chip */}
-              {/* <circle
+          {visibleData.length > 0 &&
+            isDataPointVisible(
+              visibleData[visibleData.length - 1].timestamp
+            ) && (
+              <>
+                <PokerChip
+                  color={getChipColor(
+                    visibleData[visibleData.length - 1],
+                    visibleData.length - 1
+                  )}
+                  x={xScale(getX(visibleData[visibleData.length - 1]))}
+                  y={yScale(getY(visibleData[visibleData.length - 1]))}
+                  size={24}
+                />
+                {/* Add a subtle glow effect around the most recent chip */}
+                {/* <circle
                 cx={xScale(getX(visibleData[visibleData.length - 1]))}
                 cy={yScale(getY(visibleData[visibleData.length - 1]))}
                 r={14}
@@ -398,8 +407,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
                 strokeWidth={2}
                 opacity={0.6}
               /> */}
-            </>
-          )}
+              </>
+            )}
         </Group>
 
         {/* Y-axis labels */}

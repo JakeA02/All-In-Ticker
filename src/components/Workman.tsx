@@ -41,7 +41,7 @@ export const Workman: React.FC<WorkmanProps> = ({
 }) => { 
   // Memoize rest position to prevent unnecessary re-renders
   const restPosition: WorkmanPosition = useMemo(() => ({
-    x: margin + graphWidth - 20,
+    x: margin + 50,
     y: margin + graphHeight - 35
   }), [margin, graphWidth, graphHeight]);
 
@@ -55,7 +55,7 @@ export const Workman: React.FC<WorkmanProps> = ({
   const [ladderX, setLadderX] = useState<number>(0);
 
   // Animation parameters
-  const ANIMATION_DURATION = 1500; // 1 second for each movement
+  const ANIMATION_DURATION = 6000; // 1 second for each movement
   const WAIT_DURATION = 3000; // 3 seconds wait at data point
 
   // Map animation phases to character states
@@ -77,10 +77,13 @@ export const Workman: React.FC<WorkmanProps> = ({
   const getCharacterDirection = (phase: AnimationPhase): CharacterDirection => {
     switch (phase) {
       case 'returningToX': // Moving left back to rest position
+      return "right";
       case 'returningToY': // Coming down the ladder (facing left)
-        return 'left';
+        return 'right';
       case 'movingToX':   // Moving right to data point
+      return "left";
       case 'movingToY':   // Going up the ladder (facing right)
+      return "left";
       case 'idle':
       case 'waiting':
       default:
@@ -186,7 +189,7 @@ export const Workman: React.FC<WorkmanProps> = ({
           onBuildingComplete?.();
           
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+          const easeProgress = 1 - Math.pow(1 - progress, 1); // Ease out cubic
           
           const newY = startPosition.y + (restPosition.y - startPosition.y) * easeProgress;
           
@@ -256,7 +259,7 @@ export const Workman: React.FC<WorkmanProps> = ({
     return (
       <image
       href={chipPath}
-      x={margin + graphWidth - 10}
+      x={margin}
       y={margin + graphHeight - 30}
       width={35}
       height={35}
@@ -276,7 +279,7 @@ export const Workman: React.FC<WorkmanProps> = ({
     
     // Position the chip slightly above and in front of the character based on direction
     const direction = getCharacterDirection(animationPhase);
-    const offsetX = direction === 'right' ? -15 : -15;
+    const offsetX = direction === 'right' ? -15 : 15;
     const chipX = position.x + offsetX;
     const chipY = position.y + 8; // Slightly higher to look like it's being carried
 

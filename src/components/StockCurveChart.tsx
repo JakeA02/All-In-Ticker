@@ -429,13 +429,14 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
               fontSize={10}
               fill="#EDEDED"
             >
-              {tick.toLocaleTimeString("en-US", {
+              {new Intl.DateTimeFormat("en-US", {
+                timeZone: "America/New_York",
                 hour: "numeric",
-                minute: "2-digit",
+                minute: "numeric",
                 hour12: true,
-              })}
+              }).format(new Date())}
             </text>
-          )          )}
+          ))}
         </Group>
 
         {/* Workman overlay */}

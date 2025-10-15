@@ -282,6 +282,21 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           stroke="none"
         />
 
+        {/* Subtle "ALL-IN" watermark behind all content */}
+        <text
+          x={width / 2}
+          y={svgHeight / 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={120}
+          fontWeight="bold"
+          fill="#000000"
+          opacity={0.05}
+          letterSpacing="0.1em"
+        >
+          ALL-IN
+        </text>
+
         {/* <Group>
           <text
             x={width / 2}

@@ -10,6 +10,7 @@ export interface PixelCharacterProps {
   size?: number;
   walkingFrameCount?: number;
   frameDuration?: number;
+  speedMultiplier?: number;
 }
 
 export const PixelCharacter: React.FC<PixelCharacterProps> = ({
@@ -20,12 +21,14 @@ export const PixelCharacter: React.FC<PixelCharacterProps> = ({
   direction = 'right',
   size = 32,
   walkingFrameCount = 3,
-  frameDuration = 200
+  frameDuration = 200,
+  speedMultiplier = 1.0
 }) => {
   const { currentSprite, shouldFlip } = useCharacterAnimation(state, direction, {
     characterName,
     walkingFrameCount,
-    frameDuration
+    frameDuration,
+    speedMultiplier
   });
 
   return (

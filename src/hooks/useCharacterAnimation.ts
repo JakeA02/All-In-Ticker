@@ -7,6 +7,7 @@ export interface UseCharacterAnimationOptions {
   characterName: string;
   walkingFrameCount?: number;
   frameDuration?: number; // Duration each frame is shown in ms
+  speedMultiplier?: number; // 1.0 = normal speed, 0.5 = half speed, etc.
 }
 
 export interface CharacterAnimationResult {
@@ -23,7 +24,8 @@ export const useCharacterAnimation = (
   const {
     characterName,
     walkingFrameCount = 3,
-    frameDuration = 200
+    frameDuration = 200,
+    speedMultiplier = 1.0
   } = options;
 
   const [currentFrame, setCurrentFrame] = useState(1);
@@ -36,7 +38,11 @@ export const useCharacterAnimation = (
       setIsAnimating(true);
       
       const animate = (currentTime: number) => {
-        if (currentTime - lastFrameTimeRef.current >= frameDuration) {
+        // Adjust frame duration based on speed multiplier
+        // Lower speed = longer duration between frames
+        const adjustedFrameDuration = frameDuration / Math.max(speedMultiplier, 0.1);
+        
+        if (currentTime - lastFrameTimeRef.current >= adjustedFrameDuration) {
           setCurrentFrame(prev => (prev % walkingFrameCount) + 1);
           lastFrameTimeRef.current = currentTime;
         }
@@ -57,7 +63,7 @@ export const useCharacterAnimation = (
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [state, frameDuration, walkingFrameCount]);
+  }, [state, frameDuration, walkingFrameCount, speedMultiplier]);
 
   const currentSprite = state === 'standing' 
     ? `/images/${characterName}/standing.png`

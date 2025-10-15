@@ -48,6 +48,7 @@ export const Workman: React.FC<WorkmanProps> = ({
   const [position, setPosition] = useState<WorkmanPosition>(restPosition);
   const [animationPhase, setAnimationPhase] = useState<AnimationPhase>('idle');
   const [targetDataPoint, setTargetDataPoint] = useState<StockDataPoint | null>(null);
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1.0);
 
   // Add ladder-related state
   const [showLadder, setShowLadder] = useState<boolean>(false);
@@ -131,6 +132,10 @@ export const Workman: React.FC<WorkmanProps> = ({
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
           const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
           
+          // Calculate instantaneous velocity (derivative of ease-out cubic)
+          const velocity = 3 * Math.pow(1 - progress, 2);
+          setSpeedMultiplier(velocity);
+          
           const newX = restPosition.x + (targetX - restPosition.x) * easeProgress;
 
           setPosition(prev => ({
@@ -154,9 +159,11 @@ export const Workman: React.FC<WorkmanProps> = ({
           if (!startPosition) break;
           
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
           
-          const newY = startPosition.y + (targetY - startPosition.y) * easeProgress;
+          // Linear motion, constant velocity
+          setSpeedMultiplier(1.0);
+          
+          const newY = startPosition.y + (targetY - startPosition.y) * progress;
           
           setPosition(prev => ({
             x: prev.x,
@@ -189,9 +196,11 @@ export const Workman: React.FC<WorkmanProps> = ({
           onBuildingComplete?.();
           
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 1); // Ease out cubic
           
-          const newY = startPosition.y + (restPosition.y - startPosition.y) * easeProgress;
+          // Linear motion, constant velocity
+          setSpeedMultiplier(1.0);
+          
+          const newY = startPosition.y + (restPosition.y - startPosition.y) * progress;
           
           setPosition(prev => ({
             x: prev.x, // Keep current X position
@@ -214,6 +223,10 @@ export const Workman: React.FC<WorkmanProps> = ({
           
           const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
           const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+          
+          // Calculate instantaneous velocity (derivative of ease-out cubic)
+          const velocity = 3 * Math.pow(1 - progress, 2);
+          setSpeedMultiplier(velocity);
           
           const newX = startPosition.x + (restPosition.x - startPosition.x) * easeProgress;
           
@@ -354,6 +367,7 @@ export const Workman: React.FC<WorkmanProps> = ({
         direction={getCharacterDirection(animationPhase)}
         size={84}
         frameDuration={300}
+        speedMultiplier={speedMultiplier}
       />
       
       {/* Carried poker chip (renders above character) */}

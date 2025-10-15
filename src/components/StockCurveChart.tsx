@@ -443,7 +443,7 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
                 hour: "numeric",
                 minute: "numeric",
                 hour12: true,
-              }).format(new Date())}
+              }).format(tick)}
             </text>
           ))}
         </Group>

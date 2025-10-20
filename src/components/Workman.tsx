@@ -70,9 +70,10 @@ export const Workman: React.FC<WorkmanProps> = ({
   const [ladderX, setLadderX] = useState<number>(0);
 
   // Animation parameters
-  const HORIZONTAL_ANIMATION_DURATION = 10000; // Horizontal walking duration
+  const HORIZONTAL_ANIMATION_DURATION = 8000; // Horizontal walking duration
   const VERTICAL_ANIMATION_DURATION = 6000; // Vertical ladder climbing duration
   const WAIT_DURATION = 3000; // 3 seconds wait at data point
+  const cubicEaseOut = false; // Toggle cubic easing for horizontal movements
 
   // Map animation phases to character states
   const getCharacterState = (phase: AnimationPhase): CharacterState => {
@@ -143,10 +144,12 @@ export const Workman: React.FC<WorkmanProps> = ({
       switch (animationPhase) {
         case "movingToX": {
           const progress = Math.min(elapsed / HORIZONTAL_ANIMATION_DURATION, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+          const easeProgress = cubicEaseOut
+            ? 1 - Math.pow(1 - progress, 3) // Ease out cubic
+            : progress; // Linear
 
-          // Calculate instantaneous velocity (derivative of ease-out cubic)
-          const velocity = 3 * Math.pow(1 - progress, 2);
+          // Calculate instantaneous velocity (derivative of ease-out cubic or constant for linear)
+          const velocity = cubicEaseOut ? 3 * Math.pow(1 - progress, 2) : 1.0;
           setSpeedMultiplier(velocity);
 
           const newX =
@@ -237,10 +240,12 @@ export const Workman: React.FC<WorkmanProps> = ({
           if (!startPosition) break;
 
           const progress = Math.min(elapsed / HORIZONTAL_ANIMATION_DURATION, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+          const easeProgress = cubicEaseOut
+            ? 1 - Math.pow(1 - progress, 3) // Ease out cubic
+            : progress; // Linear
 
-          // Calculate instantaneous velocity (derivative of ease-out cubic)
-          const velocity = 3 * Math.pow(1 - progress, 2);
+          // Calculate instantaneous velocity (derivative of ease-out cubic or constant for linear)
+          const velocity = cubicEaseOut ? 3 * Math.pow(1 - progress, 2) : 1.0;
           setSpeedMultiplier(velocity);
 
           const newX =

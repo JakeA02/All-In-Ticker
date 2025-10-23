@@ -20,7 +20,7 @@ export const PixelCharacter: React.FC<PixelCharacterProps> = ({
   state,
   direction = 'right',
   size = 32,
-  walkingFrameCount = 3,
+  walkingFrameCount = 4,
   frameDuration = 200,
   speedMultiplier = 1.0
 }) => {

@@ -5,10 +5,10 @@ import {
   generateMockStockData,
   initializeWithPrePopulatedData,
 } from "../utils/mockData";
+import { apiClient } from "../utils/apiClient";
 
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-// const POLLING_INTERVAL = process.env.REACT_APP_POLLING_INTERVAL ? parseInt(process.env.REACT_APP_POLLING_INTERVAL) : 60000;
-const POLLING_INTERVAL = 60000;
+const POLLING_INTERVAL = process.env.REACT_APP_POLLING_INTERVAL ? parseInt(process.env.REACT_APP_POLLING_INTERVAL) : 60000;
+
 
 export const useFinnhubStock = (symbol: string = "TSLA") => {
   const { useMockData } = useStock();
@@ -33,16 +33,8 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
     "minuteData"
   > | null> => {
     try {
-      // For demo purposes, we'll use mock data by default
-      // In production, replace this with actual Finnhub API call
-      const response = await fetch(
-        `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch stock data");
-      }
-
-      const data: FinnhubQuote = await response.json();
+      // Call our API endpoint instead of Finnhub directly
+      const data: FinnhubQuote = await apiClient.getStockQuote(symbol);
 
       const changeOverDay = data.c - data.pc;
       const changeOverDayPercent = (changeOverDay / data.pc) * 100;
@@ -74,30 +66,36 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
         // Use mock data for demo
         newStockData = generateMockStockData();
       } else {
-        // Use real Finnhub API
-        const data = await fetchStockData();
-        if (!data) throw new Error("No data received");
+        try {
+          // Use real Finnhub API through our backend
+          const data = await fetchStockData();
+          if (!data) throw new Error("No data received");
 
-        // Create a new data point for minute data
-        // Use current time for the timestamp to show when we fetched the data
-        const newDataPoint: StockDataPoint = {
-          price: data.current,
-          timestamp: Date.now(),
-        };
+          // Create a new data point for minute data
+          // Use current time for the timestamp to show when we fetched the data
+          const newDataPoint: StockDataPoint = {
+            price: data.current,
+            timestamp: Date.now(),
+          };
 
-        // Update accumulated data using ref to avoid stale closures
-        const updatedAccumulatedData = [
-          ...accumulatedDataRef.current,
-          newDataPoint,
-        ];
-        accumulatedDataRef.current = updatedAccumulatedData;
-        setAccumulatedMinuteData(updatedAccumulatedData);
+          // Update accumulated data using ref to avoid stale closures
+          const updatedAccumulatedData = [
+            ...accumulatedDataRef.current,
+            newDataPoint,
+          ];
+          accumulatedDataRef.current = updatedAccumulatedData;
+          setAccumulatedMinuteData(updatedAccumulatedData);
 
-        // Create the final stock data with the updated minute data
-        newStockData = {
-          ...data,
-          minuteData: updatedAccumulatedData,
-        };
+          // Create the final stock data with the updated minute data
+          newStockData = {
+            ...data,
+            minuteData: updatedAccumulatedData,
+          };
+        } catch (apiError) {
+          console.warn("API call failed, falling back to mock data:", apiError);
+          // Fall back to mock data if API fails (e.g., in development)
+          newStockData = generateMockStockData();
+        }
       }
 
       setStockData(newStockData);

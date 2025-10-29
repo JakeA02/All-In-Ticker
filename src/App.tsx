@@ -2,17 +2,23 @@ import React, { useEffect, useState } from "react";
 import { StockProvider } from "./context/StockContext";
 import { PixiCanvas } from "./components/PixiCanvas";
 import { StockCurveChart } from "./components/StockCurveChart";
+import { apiClient } from "./utils/apiClient";
 import "./App.css";
 
 const App: React.FC = () => {
   const [isMarketClosed, setIsMarketClosed] = useState(false);
 
   const fetchMarketStatus = async () => {
-    const response = await fetch(
-      `https://finnhub.io/api/v1/stock/market-status?exchange=US&token=${process.env.FINNHUB_API_KEY}`
-    );
-    const data = await response.json();
-    setIsMarketClosed(!data.isOpen && process.env.REACT_APP_USE_MOCK_DATA !== "true");
+    try {
+      const data = await apiClient.getMarketStatus();
+      setIsMarketClosed(
+        !data.isOpen && process.env.REACT_APP_USE_MOCK_DATA !== "true"
+      );
+    } catch (error) {
+      console.error("Error fetching market status:", error);
+      // In development or when API fails, assume market is open (show the app)
+      setIsMarketClosed(false);
+    }
   };
   useEffect(() => {
     fetchMarketStatus();

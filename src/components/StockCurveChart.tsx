@@ -209,8 +209,6 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     range: [graphHeight, 0], // This is correct: higher values should be at the top
   });
 
-  // No animation - points appear as data arrives
-
   if (isLoading) {
     return (
       <div
@@ -290,8 +288,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
           dominantBaseline="middle"
           fontSize={120}
           fontWeight="bold"
-          fill="#000000"
-          opacity={0.05}
+          fill="#ffffff"
+          opacity={1}
           letterSpacing="0.1em"
         >
           ALL-IN

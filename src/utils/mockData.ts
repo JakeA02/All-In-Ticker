@@ -1,4 +1,5 @@
 import { StockPrice, StockDataPoint } from '../types/stock';
+import { currentCharacterStockData } from './CharacterStockData';
 
 // Mock data generator for testing
 // export const generateMockStockData = (): StockPrice => {
@@ -24,17 +25,57 @@ import { StockPrice, StockDataPoint } from '../types/stock';
 // };
 
 // Persistent state for simulating real-time data
-let currentSimulatedPrice = 150;
+let currentSimulatedPrice = 49;
 let simulatedDataPoints: StockDataPoint[] = [];
 let lastFetchTime = 0;
 let dailyTrendStrength = (Math.random() - 0.5) * 0.002; // Overall daily trend
 
+// Generate a full trading day of data upfront (390 minutes)
+export const generatePrePopulatedData = (numMinutes: number = 390): StockDataPoint[] => {
+  const basePrice = 49;
+  const volatility = 0.002;
+  const trendStrength = (Math.random() - 0.5) * 0.002;
+  
+  const dataPoints: StockDataPoint[] = [];
+  let price = basePrice;
+  const now = Date.now();
+  
+  // Generate data points going backwards in time (most recent last)
+  // End at least 1 minute in the past so the next real data point has proper spacing
+  for (let i = 0; i < numMinutes; i++) {
+    // Add random walk with trend
+    const randomChange = (Math.random() - 0.5) * volatility * price;
+    const trendChange = trendStrength * price;
+    price = Math.max(price + randomChange + trendChange, 1);
+    
+    // Timestamp going backwards (60 seconds per minute), ending 1 minute ago
+    const timestamp = now - (numMinutes - i) * 60 * 1000;
+    
+    dataPoints.push({
+      price: Math.round(price * 100) / 100,
+      timestamp
+    });
+  }
+  
+  return dataPoints;
+};
+
 // Reset simulation for a new day
 export const resetSimulation = () => {
-  currentSimulatedPrice = 150;
+  currentSimulatedPrice = 49;
   simulatedDataPoints = [];
   lastFetchTime = 0;
   dailyTrendStrength = (Math.random() - 0.5) * 0.002;
+};
+
+// Initialize simulation with pre-populated data
+export const initializeWithPrePopulatedData = (numMinutes: number = 390) => {
+  simulatedDataPoints = generatePrePopulatedData(numMinutes);
+  if (simulatedDataPoints.length > 0) {
+    currentSimulatedPrice = simulatedDataPoints[simulatedDataPoints.length - 1].price;
+    lastFetchTime = simulatedDataPoints[simulatedDataPoints.length - 1].timestamp;
+  }
+  dailyTrendStrength = (Math.random() + 0.5) * 0.002;
 };
 
 // Generate the next minute's stock price (simulates real-time fetching)
@@ -73,7 +114,7 @@ export const generateMockStockData = (): StockPrice => {
   const allPoints = getAllSimulatedPoints();
   
   // Use first point as previous close if we have one, otherwise use a base price
-  const previousClose = allPoints.length > 1 ? allPoints[0].price : 150;
+  const previousClose = allPoints.length > 1 ? allPoints[0].price : 415;
   const current = newPoint.price;
   
   const change = current - previousClose;
@@ -81,7 +122,7 @@ export const generateMockStockData = (): StockPrice => {
   const changeOverDay = current - previousClose;
   const changeOverDayPercent = (changeOverDay / previousClose) * 100;
   return {
-    symbol: 'MOCK',
+    symbol: currentCharacterStockData()?.stock || "TSLA",
     current: Math.round(current * 100) / 100,
     previousClose: Math.round(previousClose * 100) / 100,
     change: Math.round(change * 100) / 100,

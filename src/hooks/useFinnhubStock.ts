@@ -1,18 +1,24 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useStock } from '../context/StockContext';
-import { StockPrice, FinnhubQuote, StockDataPoint } from '../types/stock';
-import { generateMockStockData } from '../utils/mockData';
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useStock } from "../context/StockContext";
+import { StockPrice, FinnhubQuote, StockDataPoint } from "../types/stock";
+import {
+  generateMockStockData,
+  initializeWithPrePopulatedData,
+} from "../utils/mockData";
 
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-const POLLING_INTERVAL = process.env.REACT_APP_POLLING_INTERVAL ? parseInt(process.env.REACT_APP_POLLING_INTERVAL) : 60000; 
+const FINNHUB_API_KEY = process.env.REACT_APP_FINNHUB_API_KEY;
+// const POLLING_INTERVAL = process.env.REACT_APP_POLLING_INTERVAL ? parseInt(process.env.REACT_APP_POLLING_INTERVAL) : 60000;
+const POLLING_INTERVAL = 60000;
 
-export const useFinnhubStock = (symbol: string = 'TSLA') => {
+export const useFinnhubStock = (symbol: string = "TSLA") => {
   const { useMockData } = useStock();
   const [stockData, setStockData] = useState<StockPrice | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [accumulatedMinuteData, setAccumulatedMinuteData] = useState<StockDataPoint[]>([]);
-  
+  const [accumulatedMinuteData, setAccumulatedMinuteData] = useState<
+    StockDataPoint[]
+  >([]);
+
   // Use ref to track current accumulated data to avoid stale closures
   const accumulatedDataRef = useRef<StockDataPoint[]>([]);
 
@@ -22,7 +28,10 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
     accumulatedDataRef.current = [];
   }, []);
 
-  const fetchStockData = async (): Promise<Omit<StockPrice, 'minuteData'> | null> => {
+  const fetchStockData = async (): Promise<Omit<
+    StockPrice,
+    "minuteData"
+  > | null> => {
     try {
       // For demo purposes, we'll use mock data by default
       // In production, replace this with actual Finnhub API call
@@ -30,14 +39,14 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
         `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
       );
       if (!response.ok) {
-        throw new Error('Failed to fetch stock data');
+        throw new Error("Failed to fetch stock data");
       }
-      
+
       const data: FinnhubQuote = await response.json();
 
       const changeOverDay = data.c - data.pc;
       const changeOverDayPercent = (changeOverDay / data.pc) * 100;
-      
+
       return {
         symbol,
         current: data.c,
@@ -49,7 +58,7 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
         changeOverDayPercent,
       };
     } catch (error) {
-      console.error('Error fetching stock data:', error);
+      console.error("Error fetching stock data:", error);
       throw error;
     }
   };
@@ -60,39 +69,43 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
 
     try {
       let newStockData: StockPrice;
-      
+
       if (useMockData) {
         // Use mock data for demo
         newStockData = generateMockStockData();
       } else {
         // Use real Finnhub API
         const data = await fetchStockData();
-        if (!data) throw new Error('No data received');
-        
+        if (!data) throw new Error("No data received");
+
         // Create a new data point for minute data
         // Use current time for the timestamp to show when we fetched the data
         const newDataPoint: StockDataPoint = {
           price: data.current,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
-        
+
         // Update accumulated data using ref to avoid stale closures
-        const updatedAccumulatedData = [...accumulatedDataRef.current, newDataPoint];
+        const updatedAccumulatedData = [
+          ...accumulatedDataRef.current,
+          newDataPoint,
+        ];
         accumulatedDataRef.current = updatedAccumulatedData;
         setAccumulatedMinuteData(updatedAccumulatedData);
-        
+
         // Create the final stock data with the updated minute data
         newStockData = {
           ...data,
-          minuteData: updatedAccumulatedData
+          minuteData: updatedAccumulatedData,
         };
-        
       }
 
       setStockData(newStockData);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
-      console.error('Stock data update failed:', error);
+      setError(
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
+      console.error("Stock data update failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +114,12 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
   useEffect(() => {
     // Reset accumulated data when symbol changes or switching between mock/real data
     resetAccumulatedData();
-    
+
+    // Initialize mock data with pre-populated data for testing (390 minutes = full trading day)
+    if (useMockData) {
+      initializeWithPrePopulatedData(299);
+    }
+
     // Initial fetch
     updateStockData();
 
@@ -111,7 +129,7 @@ export const useFinnhubStock = (symbol: string = 'TSLA') => {
     return () => {
       clearInterval(interval);
     };
-  }, [updateStockData, resetAccumulatedData]);
+  }, [updateStockData, resetAccumulatedData, useMockData]);
 
   return {
     stockData,

@@ -6,7 +6,7 @@ export interface CharacterStockData {
 const CharacterStockData: CharacterStockData[] = [
   { stock: "TSLA", character: "jcal" },
   { stock: "URA", character: "friedberg" },
-  { stock: "META", character: "chamath" },
+  { stock: "AEXA", character: "chamath" },
   { stock: "AIQ", character: "sacks" },
   { stock: "IBB", character: "charlie" },
 ];

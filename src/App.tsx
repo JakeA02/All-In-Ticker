@@ -33,7 +33,7 @@ const App: React.FC = () => {
       <div className="App">
         <div className="canvas-container">
           {/* Stock curve chart as the base layer */}
-          {!isMarketClosed ? (
+          {!isMarketClosed || process.env.REACT_APP_DEMO_MODE === "true"? (
             <>
               <StockCurveChart showControls={false} />
               <PixiCanvas />

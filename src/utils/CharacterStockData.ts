@@ -20,6 +20,15 @@ export const currentCharacterStockData = () => {
   const day = now.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
 
   // If the market is open, return the stock corresponding to the current day.
+
+  if (process.env.REACT_APP_USE_MOCK_DATA === "true") {
+    // Cycle every 10 seconds
+    const secondsSinceEpoch = Math.floor(Date.now() / 1000);
+    const index =
+      Math.floor(secondsSinceEpoch / 60) % CharacterStockData.length;
+    return CharacterStockData[index];
+  }
+
   switch (day) {
     case 1: // Monday
       return CharacterStockData[0];

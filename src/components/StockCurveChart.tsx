@@ -71,9 +71,27 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
     height: propHeight || window.innerHeight,
   });
 
-  const { stockData, isLoading, error } = useFinnhubStock(
+  const [currentStock, setCurrentStock] = useState<string | undefined>(
     currentCharacterStockData()?.stock
   );
+  
+  // Add this effect to update the stock periodically:
+  useEffect(() => {
+    const updateStock = () => {
+      const newStock = currentCharacterStockData()?.stock;
+      if (newStock !== currentStock) {
+        setCurrentStock(newStock);
+      }
+    };
+  
+    // Check every second if we should switch stocks
+    const interval = setInterval(updateStock, 1000);
+    return () => clearInterval(interval);
+  }, [currentStock]);
+  
+  // Then update the hook call to use the state:
+  const { stockData, isLoading, error } = useFinnhubStock(currentStock);
+
 
   // Handle window resize
   useEffect(() => {

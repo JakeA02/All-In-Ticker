@@ -115,7 +115,7 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
 
     // Initialize mock data with pre-populated data for testing (390 minutes = full trading day)
     if (useMockData) {
-      initializeWithPrePopulatedData(299);
+      initializeWithPrePopulatedData(15);
     }
 
     // Initial fetch

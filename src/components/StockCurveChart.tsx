@@ -345,8 +345,8 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
             fontSize={20}
             fill={stockColor()}
           >
-            {stockData?.symbol} ({stockIsUp() ? "+" : ""}
-            {stockData?.changeOverDayPercent.toFixed(2)}%)
+            {stockData?.symbol}: {stockData?.current?.toFixed(2)} ({stockIsUp() ? "+" : ""}
+            {stockData?.changeOverDayPercent?.toFixed(2)}%)
           </text>
 
           <text

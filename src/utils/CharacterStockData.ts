@@ -28,19 +28,10 @@ export const currentCharacterStockData = () => {
       Math.floor(secondsSinceEpoch / 60) % CharacterStockData.length;
     return CharacterStockData[index];
   }
-
-  switch (day) {
-    case 1: // Monday
-      return CharacterStockData[0];
-    case 2: // Tuesday
-      return CharacterStockData[1];
-    case 3: // Wednesday
-      return CharacterStockData[2];
-    case 4: // Thursday
-      return CharacterStockData[3];
-    case 5: // Friday
-      return CharacterStockData[4];
-    default:
-      return null;
+  else {
+    const minutsSinceEpoch = Math.floor(Date.now() / 60000);
+    const index =
+      Math.floor(minutsSinceEpoch / 60) % CharacterStockData.length;
+    return CharacterStockData[index];
   }
 };

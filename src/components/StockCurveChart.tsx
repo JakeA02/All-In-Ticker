@@ -90,8 +90,20 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
   }, [currentStock]);
   
   // Then update the hook call to use the state:
-  const { stockData, isLoading, error } = useFinnhubStock(currentStock);
+  const { stockData, isLoading, error, resetAccumulatedData } = useFinnhubStock(currentStock);
 
+  // Reset graph data when stock symbol changes
+  useEffect(() => {
+    if (resetAccumulatedData) {
+      resetAccumulatedData();
+      // Also reset local animation state
+      setLastSegmentTime(null);
+      setNewDataPoint(null);
+      setIsBuilding(false);
+      setCurrentChipColor(null);
+      setCurrentChipIndex(null);
+    }
+  }, [currentStock, resetAccumulatedData]);
 
   // Handle window resize
   useEffect(() => {

@@ -339,13 +339,13 @@ export const StockCurveChart: React.FC<StockCurveChartProps> = ({
 
         <Group>
           <text
-            x={MARGIN + 50}
+            x={MARGIN + 105}
             y={MARGIN - 10}
             textAnchor="middle"
             fontSize={20}
             fill={stockColor()}
           >
-            {stockData?.symbol}: {stockData?.current?.toFixed(2)} ({stockIsUp() ? "+" : ""}
+            {stockData?.symbol}: ${stockData?.current?.toFixed(2)} ({stockIsUp() ? "+" : ""}
             {stockData?.changeOverDayPercent?.toFixed(2)}%)
           </text>
 

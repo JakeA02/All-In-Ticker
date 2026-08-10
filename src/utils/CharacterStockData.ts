@@ -4,11 +4,11 @@ export interface CharacterStockData {
 }
 
 const CharacterStockData: CharacterStockData[] = [
-  { stock: "UBER", character: "jcal" },
-  { stock: "NLR", character: "friedberg" },
-  { stock: "TSLA", character: "chamath" },
-  { stock: "NVDA", character: "sacks" },
-  { stock: "DNA", character: "charlie" },
+  { stock: "NVDA", character: "jcal" },
+  { stock: "GOOG", character: "friedberg" },
+  { stock: "AMD", character: "chamath" },
+  { stock: "PYPL", character: "sacks" },
+  { stock: "SPCX", character: "charlie" },
 ];
 
 export const currentCharacterStockData = () => {

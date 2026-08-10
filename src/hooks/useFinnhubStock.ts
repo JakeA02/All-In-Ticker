@@ -21,6 +21,8 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
 
   // Use ref to track current accumulated data to avoid stale closures
   const accumulatedDataRef = useRef<StockDataPoint[]>([]);
+  const symbolRef = useRef(symbol);
+  symbolRef.current = symbol;
 
   // Reset accumulated data (useful when changing symbols or starting fresh)
   const resetAccumulatedData = useCallback(() => {
@@ -28,19 +30,18 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
     accumulatedDataRef.current = [];
   }, []);
 
-  const fetchStockData = async (): Promise<Omit<
-    StockPrice,
-    "minuteData"
-  > | null> => {
+  const fetchStockData = async (
+    stockSymbol: string
+  ): Promise<Omit<StockPrice, "minuteData"> | null> => {
     try {
       // Call our API endpoint instead of Finnhub directly
-      const data: FinnhubQuote = await apiClient.getStockQuote(symbol);
+      const data: FinnhubQuote = await apiClient.getStockQuote(stockSymbol);
 
       const changeOverDay = data.c - data.pc;
       const changeOverDayPercent = (changeOverDay / data.pc) * 100;
 
       return {
-        symbol,
+        symbol: stockSymbol,
         current: data.c,
         previousClose: data.pc,
         change: data.c - data.pc,
@@ -56,6 +57,7 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
   };
 
   const updateStockData = useCallback(async () => {
+    const requestSymbol = symbol;
     // setIsLoading(true);
     setError(null);
 
@@ -68,7 +70,9 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
       } else {
         try {
           // Use real Finnhub API through our backend
-          const data = await fetchStockData();
+          const data = await fetchStockData(requestSymbol);
+          // Ignore stale responses from a previous symbol (e.g. hour-boundary switch)
+          if (requestSymbol !== symbolRef.current) return;
           if (!data) throw new Error("No data received");
 
           // Create a new data point for minute data
@@ -92,12 +96,14 @@ export const useFinnhubStock = (symbol: string = "TSLA") => {
             minuteData: updatedAccumulatedData,
           };
         } catch (apiError) {
+          if (requestSymbol !== symbolRef.current) return;
           console.warn("API call failed, falling back to mock data:", apiError);
           // Fall back to mock data if API fails (e.g., in development)
           newStockData = generateMockStockData();
         }
       }
 
+      if (requestSymbol !== symbolRef.current) return;
       setStockData(newStockData);
     } catch (error) {
       setError(
